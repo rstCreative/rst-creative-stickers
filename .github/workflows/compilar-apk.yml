@@ -1,0 +1,48 @@
+name: Compilar APK de stickers
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  compilar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Descomprimir el proyecto
+        run: |
+          if [ -f proyecto-stickers.zip ]; then
+            unzip -o -q proyecto-stickers.zip -d .
+            echo "Proyecto descomprimido."
+          fi
+
+      - name: Instalar Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Instalar Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: local.properties
+        run: echo "sdk.dir=$ANDROID_HOME" > local.properties
+
+      - name: Compilar APK
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon --stacktrace
+          cp app/build/outputs/apk/debug/app-debug.apk RST-Creative-Stickers.apk
+
+      - name: Publicar en Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.${{ github.run_number }}
+          name: RST Creative Stickers 1.0.${{ github.run_number }}
+          body: "Instala RST-Creative-Stickers.apk en tu celular Android. Luego abrela y toca Agregar a WhatsApp."
+          files: RST-Creative-Stickers.apk
