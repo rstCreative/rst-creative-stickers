@@ -11,8 +11,6 @@ permissions:
 jobs:
   compilar:
     runs-on: ubuntu-latest
-    env:
-      ANDROID_SDK_ROOT: ${{ github.workspace }}/android-sdk
     steps:
       - uses: actions/checkout@v4
 
@@ -42,8 +40,8 @@ jobs:
           yes | sdkmanager --licenses >/dev/null 2>&1 || true
           sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
 
-      - name: local.properties
-        run: echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
+      - name: Crear local.properties
+        run: echo "sdk.dir=$ANDROID_HOME" > local.properties
 
       - name: Compilar APK
         run: |
